@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Scan History — LMPC Compliance Scanner{% endblock %}
+{% block content %}
+
+<h3 class="mb-4"><i class="fa-solid fa-clock-rotate-left me-2"></i>Scan &amp; Inspection History</h3>
+
+<div class="card p-3 mb-3">
+  <form method="GET" class="row g-2 align-items-end">
+    <div class="col-md-6">
+      <label class="form-label small">Search (product, brand, barcode, location)</label>
+      <input type="text" name="q" class="form-control" value="{{ q }}" placeholder="e.g. Fortune, sunflower oil, DL-Store-12...">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label small">Status</label>
+      <select name="status" class="form-select">
+        <option value="">All</option>
+        <option value="COMPLIANT" {% if status_filter=='COMPLIANT' %}selected{% endif %}>Compliant</option>
+        <option value="NON_COMPLIANT" {% if status_filter=='NON_COMPLIANT' %}selected{% endif %}>Non-Compliant</option>
+        <option value="NEEDS_REVIEW" {% if status_filter=='NEEDS_REVIEW' %}selected{% endif %}>Needs Review</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <button class="btn btn-primary w-100" type="submit"><i class="fa-solid fa-magnifying-glass me-1"></i>Search</button>
+    </div>
+  </form>
+</div>
+
+<div class="card p-3">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead>
+        <tr>
+          <th>#</th><th>Product</th><th>Brand</th><th>Location</th><th>Inspector</th><th>Status</th><th>Date</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for scan in scans %}
+        <tr>
+          <td>SCAN-{{ '%06d' % scan.id }}</td>
+          <td>{{ scan.product.name }}</td>
+          <td>{{ scan.product.brand or '-' }}</td>
+          <td>{{ scan.location or '-' }}</td>
+          <td>{{ scan.inspector.username }}</td>
+          <td><span class="badge badge-status-{{ scan.status }}">{{ scan.status.replace('_',' ') }}</span></td>
+          <td>{{ scan.created_at.strftime('%d-%b-%Y %H:%M') }}</td>
+          <td>
+            <a href="{{ url_for('scan_detail', scan_id=scan.id) }}" class="btn btn-sm btn-outline-secondary">View</a>
+            <a href="{{ url_for('scan_report_pdf', scan_id=scan.id) }}" class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-file-pdf"></i></a>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" class="text-center text-muted py-4">No matching scans found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

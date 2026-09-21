@@ -1,0 +1,32 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Environments
+.venv/
+venv/
+ENV/
+env/
+
+# Database
+instance/*.db
+*.sqlite3
+
+# Uploads and generated reports (retain folder with .gitkeep)
+uploads/*
+!uploads/.gitkeep
+reports/*
+!reports/.gitkeep
+
+# Environment variables & secrets
+.env
+.env.*
+
+# OS and IDE files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

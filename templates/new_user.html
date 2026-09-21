@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Add User — LMPC Compliance Scanner{% endblock %}
+{% block content %}
+
+<h3 class="mb-4"><i class="fa-solid fa-user-plus me-2"></i>Add Enforcement User</h3>
+
+<div class="row">
+  <div class="col-lg-6">
+    <div class="card p-4">
+      <form method="POST">
+        <div class="mb-3">
+          <label class="form-label">Full Name</label>
+          <input type="text" name="full_name" class="form-control">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Username *</label>
+          <input type="text" name="username" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Password *</label>
+          <input type="password" name="password" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Role</label>
+          <select name="role" class="form-select">
+            <option value="inspector">Inspector</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Create User</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

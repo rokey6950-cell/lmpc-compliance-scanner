@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}New Scan — LMPC Compliance Scanner{% endblock %}
+{% block content %}
+
+<h3 class="mb-4"><i class="fa-solid fa-camera me-2"></i>New Product Scan</h3>
+
+<div class="row">
+  <div class="col-lg-8">
+    <div class="card p-4">
+      <form method="POST" enctype="multipart/form-data">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Product Name *</label>
+            <input type="text" name="product_name" class="form-control" required placeholder="e.g. Refined Sunflower Oil 1L">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Brand</label>
+            <input type="text" name="brand" class="form-control" placeholder="e.g. Fortune">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Category</label>
+            <input type="text" name="category" class="form-control" placeholder="e.g. Edible Oil / Food / Cosmetics">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Barcode / SKU</label>
+            <input type="text" name="barcode" class="form-control" placeholder="Optional">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Inspection Location</label>
+            <input type="text" name="location" class="form-control" placeholder="Store name / e-commerce listing URL / market">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">PDP Width (cm)</label>
+            <input type="number" step="0.1" name="pdp_width_cm" class="form-control" placeholder="Optional but recommended">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">PDP Height (cm)</label>
+            <input type="number" step="0.1" name="pdp_height_cm" class="form-control" placeholder="Optional but recommended">
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">Label / Package Image *</label>
+            <div class="dropzone" onclick="document.getElementById('imageInput').click()">
+              <i class="fa-solid fa-cloud-arrow-up fa-2x mb-2 text-secondary"></i>
+              <p class="mb-0">Click to upload a clear photo of the principal display panel</p>
+              <small class="text-muted">PNG, JPG, JPEG, WEBP, BMP — max 16MB</small>
+              <div id="previewArea" class="label-preview mt-3"></div>
+            </div>
+            <input type="file" id="imageInput" name="image" accept="image/*" class="d-none" required>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">Remarks</label>
+            <textarea name="remarks" class="form-control" rows="2" placeholder="Any additional inspector notes"></textarea>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-4">
+          <i class="fa-solid fa-magnifying-glass me-1"></i> Scan &amp; Check Compliance
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card p-3">
+      <h6><i class="fa-solid fa-circle-info me-1"></i>Tips for accurate scanning</h6>
+      <ul class="small mb-0 ps-3">
+        <li>Photograph the principal display panel (front label) flat and well-lit.</li>
+        <li>Enter the panel's width &amp; height in cm for accurate font-size (mm) measurement — without this, results are an estimate.</li>
+        <li>Avoid glare and blur; ensure MRP, net quantity and mfg date are all clearly visible.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('imageInput').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  const preview = document.getElementById('previewArea');
+  preview.innerHTML = '';
+  if (file) {
+    const img = document.createElement('img');
+    img.src = URL.createObjectURL(file);
+    preview.appendChild(img);
+  }
+});
+</script>
+{% endblock %}

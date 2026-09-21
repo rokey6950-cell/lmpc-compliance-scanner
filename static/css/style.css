@@ -1,0 +1,79 @@
+:root {
+  --brand-navy: #0b2545;
+  --brand-blue: #13315c;
+  --brand-accent: #eb6a1e;
+  --status-green: #1a7f37;
+  --status-red: #cf222e;
+  --status-amber: #9a6700;
+}
+
+body {
+  background-color: #f4f6f9;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+}
+
+.app-navbar {
+  background: linear-gradient(90deg, var(--brand-navy), var(--brand-blue));
+}
+
+.card {
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.stat-card {
+  border-radius: 12px;
+  padding: 1.25rem;
+  color: #fff;
+}
+.stat-card .stat-value { font-size: 2rem; font-weight: 700; }
+.stat-card.bg-total { background: linear-gradient(135deg, #13315c, #0b2545); }
+.stat-card.bg-compliant { background: linear-gradient(135deg, #1a7f37, #14602b); }
+.stat-card.bg-noncompliant { background: linear-gradient(135deg, #cf222e, #9e1b24); }
+.stat-card.bg-review { background: linear-gradient(135deg, #9a6700, #7a5200); }
+
+.badge-status-COMPLIANT { background-color: var(--status-green); }
+.badge-status-NON_COMPLIANT { background-color: var(--status-red); }
+.badge-status-NEEDS_REVIEW { background-color: var(--status-amber); }
+
+.login-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--brand-navy), var(--brand-blue));
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 14px;
+}
+
+.declaration-row.missing { background-color: #fdecea; }
+.declaration-row.ok { background-color: #eaf7ec; }
+.declaration-row.review { background-color: #fff6e5; }
+
+.dropzone {
+  border: 2px dashed #b7c0cc;
+  border-radius: 10px;
+  padding: 2rem;
+  text-align: center;
+  background: #fbfcfe;
+  cursor: pointer;
+}
+.dropzone:hover { border-color: var(--brand-accent); }
+
+.label-preview img {
+  max-width: 100%;
+  border-radius: 8px;
+  border: 1px solid #e2e6ea;
+}
+
+footer.app-footer {
+  color: #7a8494;
+  font-size: 0.8rem;
+  text-align: center;
+  padding: 1.5rem 0;
+}

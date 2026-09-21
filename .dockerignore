@@ -1,0 +1,13 @@
+.git
+.gitignore
+.venv
+venv
+__pycache__
+*.pyc
+instance/*.db
+uploads/*
+!uploads/.gitkeep
+reports/*
+!reports/.gitkeep
+Dockerfile
+.dockerignore

@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: lmpc-compliance-scanner
+    env: docker
+    plan: free
+    dockerfilePath: Dockerfile
+    envVars:
+      - key: LMPC_SECRET_KEY
+        generateValue: true
+      - key: PORT
+        value: 5000

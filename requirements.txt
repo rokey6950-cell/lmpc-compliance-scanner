@@ -1,0 +1,9 @@
+Flask>=3.0
+Flask-SQLAlchemy>=3.1
+Flask-Login>=0.6
+pytesseract>=0.3.13
+opencv-python-headless>=4.9
+Pillow>=10.0
+reportlab>=4.2
+Werkzeug>=3.0
+gunicorn>=21.2.0

@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — LMPC Compliance Scanner{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h3 class="mb-0">Enforcement Dashboard</h3>
+    <small class="text-muted">Overview of scanned products and compliance status</small>
+  </div>
+  <a href="{{ url_for('new_scan') }}" class="btn btn-primary">
+    <i class="fa-solid fa-camera me-1"></i> New Scan
+  </a>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="stat-card bg-total">
+      <div class="stat-value">{{ total_scans }}</div>
+      <div>Total Scans</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card bg-compliant">
+      <div class="stat-value">{{ compliant }}</div>
+      <div>Compliant</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card bg-noncompliant">
+      <div class="stat-value">{{ non_compliant }}</div>
+      <div>Non-Compliant</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stat-card bg-review">
+      <div class="stat-value">{{ needs_review }}</div>
+      <div>Needs Review</div>
+    </div>
+  </div>
+</div>
+
+<div class="card p-3">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0">Recent Scans</h5>
+    <a href="{{ url_for('history') }}" class="small">View all history →</a>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Product</th>
+          <th>Location</th>
+          <th>Inspector</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for scan in recent_scans %}
+        <tr>
+          <td>SCAN-{{ '%06d' % scan.id }}</td>
+          <td>{{ scan.product.name }}</td>
+          <td>{{ scan.location or '-' }}</td>
+          <td>{{ scan.inspector.username }}</td>
+          <td><span class="badge badge-status-{{ scan.status }}">{{ scan.status.replace('_',' ') }}</span></td>
+          <td>{{ scan.created_at.strftime('%d-%b-%Y %H:%M') }}</td>
+          <td><a href="{{ url_for('scan_detail', scan_id=scan.id) }}" class="btn btn-sm btn-outline-secondary">View</a></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" class="text-center text-muted py-4">No scans yet. Start by scanning a product label.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<footer class="app-footer">
+  LMPC Compliance Scanner — Prototype for Department of Consumer Affairs, Ministry of Consumer Affairs, Food &amp; Public Distribution
+</footer>
+{% endblock %}
