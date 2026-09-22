@@ -47,6 +47,20 @@ login_manager = LoginManager()
 login_manager.login_view = "login"
 login_manager.init_app(app)
 
+# ---------------------------------------------------------------------------
+# Database initialisation — runs on first request (works with both
+# `python app.py` and Gunicorn / any WSGI server).
+# ---------------------------------------------------------------------------
+_db_initialised = False
+
+@app.before_request
+def _init_db_once():
+    global _db_initialised
+    if not _db_initialised:
+        db.create_all()
+        create_default_admin(app)
+        _db_initialised = True
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -306,5 +320,4 @@ def api_scan_detail(scan_id):
 
 
 if __name__ == "__main__":
-    create_default_admin(app)
     app.run(debug=True, host="0.0.0.0", port=5000)
