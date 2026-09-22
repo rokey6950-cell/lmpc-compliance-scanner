@@ -35,14 +35,17 @@ os.makedirs(REPORT_DIR, exist_ok=True)
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("LMPC_SECRET_KEY", "dev-secret-change-me")
-database_url = os.environ.get("DATABASE_URL")
-if database_url:
-    # Render and other providers often supply "postgres://", which SQLAlchemy requires as "postgresql://"
-    if database_url.startswith("postgres://"):
-        database_url = database_url.replace("postgres://", "postgresql://", 1)
-    app.config["SQLALCHEMY_DATABASE_URI"] = database_url
+
+raw_db_url = os.environ.get("DATABASE_URL", "").strip()
+sqlite_uri = "sqlite:///" + os.path.join(BASE_DIR, "instance", "lmpc.db")
+
+# Ensure DATABASE_URL is a valid URI (contains '://') and fix postgres:// prefix
+if raw_db_url and ("://" in raw_db_url):
+    if raw_db_url.startswith("postgres://"):
+        raw_db_url = raw_db_url.replace("postgres://", "postgresql://", 1)
+    app.config["SQLALCHEMY_DATABASE_URI"] = raw_db_url
 else:
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(BASE_DIR, "instance", "lmpc.db")
+    app.config["SQLALCHEMY_DATABASE_URI"] = sqlite_uri
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16 MB uploads
@@ -65,9 +68,27 @@ _db_initialised = False
 def _init_db_once():
     global _db_initialised
     if not _db_initialised:
-        db.create_all()
-        create_default_admin(app)
-        _db_initialised = True
+        try:
+            db.create_all()
+            create_default_admin(app)
+            _db_initialised = True
+        except Exception as e:
+            app.logger.error(f"Primary database init failed: {e}")
+            # If PostgreSQL failed (e.g. invalid credentials or network block),
+            # fall back to SQLite so the site never crashes with a 500 error
+            if not str(app.config.get("SQLALCHEMY_DATABASE_URI", "")).startswith("sqlite"):
+                app.logger.warning("Falling back to local SQLite...")
+                app.config["SQLALCHEMY_DATABASE_URI"] = sqlite_uri
+                try:
+                    db.engine.dispose()
+                    db.create_all()
+                    create_default_admin(app)
+                    _db_initialised = True
+                except Exception as inner_e:
+                    app.logger.error(f"SQLite fallback failed: {inner_e}")
+                    raise inner_e
+            else:
+                raise e
 
 
 @login_manager.user_loader
