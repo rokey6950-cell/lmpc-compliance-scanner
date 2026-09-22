@@ -7,7 +7,7 @@
 <div class="row">
   <div class="col-lg-8">
     <div class="card p-4">
-      <form method="POST" enctype="multipart/form-data">
+      <form id="scanForm" method="POST" enctype="multipart/form-data">
         <div class="row g-3">
           <div class="col-md-6">
             <label class="form-label">Product Name *</label>
@@ -43,7 +43,7 @@
             <div class="dropzone" onclick="document.getElementById('imageInput').click()">
               <i class="fa-solid fa-cloud-arrow-up fa-2x mb-2 text-secondary"></i>
               <p class="mb-0">Click to upload a clear photo of the principal display panel</p>
-              <small class="text-muted">PNG, JPG, JPEG, WEBP, BMP — max 16MB</small>
+              <small class="text-muted">PNG, JPG, JPEG, WEBP, BMP — auto-optimized for high-speed mobile scanning</small>
               <div id="previewArea" class="label-preview mt-3"></div>
             </div>
             <input type="file" id="imageInput" name="image" accept="image/*" class="d-none" required>
@@ -55,7 +55,7 @@
           </div>
         </div>
 
-        <button type="submit" class="btn btn-primary mt-4">
+        <button type="submit" id="submitBtn" class="btn btn-primary mt-4">
           <i class="fa-solid fa-magnifying-glass me-1"></i> Scan &amp; Check Compliance
         </button>
       </form>
@@ -75,15 +75,60 @@
 </div>
 
 <script>
-document.getElementById('imageInput').addEventListener('change', function(e) {
+const imageInput = document.getElementById('imageInput');
+const preview = document.getElementById('previewArea');
+const scanForm = document.getElementById('scanForm');
+const submitBtn = document.getElementById('submitBtn');
+
+imageInput.addEventListener('change', function(e) {
   const file = e.target.files[0];
-  const preview = document.getElementById('previewArea');
   preview.innerHTML = '';
-  if (file) {
-    const img = document.createElement('img');
-    img.src = URL.createObjectURL(file);
-    preview.appendChild(img);
-  }
+  if (!file) return;
+
+  // Show immediate preview
+  const previewImg = document.createElement('img');
+  previewImg.src = URL.createObjectURL(file);
+  preview.appendChild(previewImg);
+
+  // Compress high-resolution mobile camera photos in browser (e.g. 12MP down to 1800px)
+  // This drastically accelerates uploads over mobile network from ~10MB down to ~300KB
+  const reader = new FileReader();
+  reader.onload = function(event) {
+    const img = new Image();
+    img.onload = function() {
+      const maxDim = 1800;
+      let w = img.width;
+      let h = img.height;
+      if (w > maxDim || h > maxDim) {
+        if (w > h) {
+          h = Math.round((h * maxDim) / w);
+          w = maxDim;
+        } else {
+          w = Math.round((w * maxDim) / h);
+          h = maxDim;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        canvas.toBlob(function(blob) {
+          if (blob && window.DataTransfer) {
+            const dt = new DataTransfer();
+            dt.items.add(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' }));
+            imageInput.files = dt.files;
+          }
+        }, 'image/jpeg', 0.88);
+      }
+    };
+    img.src = event.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+scanForm.addEventListener('submit', function() {
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Analyzing Label with OCR...';
 });
 </script>
 {% endblock %}

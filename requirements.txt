@@ -7,3 +7,4 @@ Pillow>=10.0
 reportlab>=4.2
 Werkzeug>=3.0
 gunicorn>=21.2.0
+psycopg2-binary>=2.9.9

@@ -35,19 +35,30 @@ if not shutil.which("tesseract"):
 DEFAULT_ASSUMED_DPI = 300  # fallback only; used if no physical reference given
 
 
-def load_and_preprocess(image_path: str):
-    """Load image, correct skew lightly, and produce a thresholded version
-    that improves OCR accuracy on typical product labels."""
+def load_and_preprocess(image_path: str, max_dimension: int = 1800):
+    """Load image, scale proportionally if needed for high-speed OCR,
+    filter noise, and return preprocessed versions."""
     img = cv2.imread(image_path)
     if img is None:
         raise ValueError(f"Could not read image at {image_path}")
 
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    gray = cv2.bilateralFilter(gray, 9, 75, 75)
+    orig_h, orig_w = img.shape[:2]
+    scale = 1.0
+    if max(orig_h, orig_w) > max_dimension:
+        scale = max_dimension / max(orig_h, orig_w)
+        new_w = int(orig_w * scale)
+        new_h = int(orig_h * scale)
+        img_scaled = cv2.resize(img, (new_w, new_h), interpolation=cv2.INTER_AREA)
+    else:
+        img_scaled = img
+
+    gray = cv2.cvtColor(img_scaled, cv2.COLOR_BGR2GRAY)
+    # Using bilateralFilter with radius 5 for fast edge preservation
+    gray_filtered = cv2.bilateralFilter(gray, 5, 50, 50)
     thresh = cv2.adaptiveThreshold(
-        gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, 15
+        gray_filtered, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, 15
     )
-    return img, gray, thresh
+    return img, gray_filtered, thresh, orig_w, orig_h, scale
 
 
 def extract_text_and_boxes(image_path: str) -> dict:
@@ -55,13 +66,14 @@ def extract_text_and_boxes(image_path: str) -> dict:
     Run Tesseract OCR and return the full text plus word-level bounding
     boxes (used later for font-height / readability analysis).
     """
-    img, gray, thresh = load_and_preprocess(image_path)
+    img, gray, thresh, orig_w, orig_h, scale = load_and_preprocess(image_path)
 
     full_text = pytesseract.image_to_string(gray)
 
     data = pytesseract.image_to_data(gray, output_type=Output.DICT)
 
     words = []
+    inv_scale = 1.0 / scale
     n = len(data["text"])
     for i in range(n):
         txt = data["text"][i].strip()
@@ -74,19 +86,17 @@ def extract_text_and_boxes(image_path: str) -> dict:
             words.append({
                 "text": txt,
                 "conf": conf,
-                "left": data["left"][i],
-                "top": data["top"][i],
-                "width": data["width"][i],
-                "height": data["height"][i],
+                "left": int(data["left"][i] * inv_scale),
+                "top": int(data["top"][i] * inv_scale),
+                "width": int(data["width"][i] * inv_scale),
+                "height": int(data["height"][i] * inv_scale),
             })
-
-    img_h, img_w = gray.shape[:2]
 
     return {
         "full_text": full_text,
         "words": words,
-        "image_width_px": img_w,
-        "image_height_px": img_h,
+        "image_width_px": orig_w,
+        "image_height_px": orig_h,
     }
 
 
