@@ -85,50 +85,15 @@ imageInput.addEventListener('change', function(e) {
   preview.innerHTML = '';
   if (!file) return;
 
-  // Show immediate preview
   const previewImg = document.createElement('img');
   previewImg.src = URL.createObjectURL(file);
   preview.appendChild(previewImg);
-
-  // Compress high-resolution mobile camera photos in browser (e.g. 12MP down to 1800px)
-  // This drastically accelerates uploads over mobile network from ~10MB down to ~300KB
-  const reader = new FileReader();
-  reader.onload = function(event) {
-    const img = new Image();
-    img.onload = function() {
-      const maxDim = 1800;
-      let w = img.width;
-      let h = img.height;
-      if (w > maxDim || h > maxDim) {
-        if (w > h) {
-          h = Math.round((h * maxDim) / w);
-          w = maxDim;
-        } else {
-          w = Math.round((w * maxDim) / h);
-          h = maxDim;
-        }
-        const canvas = document.createElement('canvas');
-        canvas.width = w;
-        canvas.height = h;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, w, h);
-        canvas.toBlob(function(blob) {
-          if (blob && window.DataTransfer) {
-            const dt = new DataTransfer();
-            dt.items.add(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' }));
-            imageInput.files = dt.files;
-          }
-        }, 'image/jpeg', 0.88);
-      }
-    };
-    img.src = event.target.result;
-  };
-  reader.readAsDataURL(file);
 });
 
 scanForm.addEventListener('submit', function() {
-  submitBtn.disabled = true;
-  submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Analyzing Label with OCR...';
+  submitBtn.style.pointerEvents = 'none';
+  submitBtn.style.opacity = '0.85';
+  submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Uploading & Analyzing Label...';
 });
 </script>
 {% endblock %}
