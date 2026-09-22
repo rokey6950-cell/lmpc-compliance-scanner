@@ -26,5 +26,5 @@ ENV PORT=5000
 
 EXPOSE 5000
 
-# Run with Gunicorn production server
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--timeout", "120", "app:app"]
+# Run with Gunicorn production server (dynamically binds to Render's $PORT)
+CMD ["sh", "-c", "exec gunicorn --bind 0.0.0.0:${PORT:-5000} --workers 2 --timeout 120 app:app"]
