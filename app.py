@@ -39,7 +39,6 @@ app.config["SECRET_KEY"] = os.environ.get("LMPC_SECRET_KEY", "dev-secret-change-
 raw_db_url = os.environ.get("DATABASE_URL", "").strip()
 sqlite_uri = "sqlite:///" + os.path.join(BASE_DIR, "instance", "lmpc.db")
 
-# Ensure DATABASE_URL is a valid URI (contains '://') and fix postgres:// prefix
 if raw_db_url and ("://" in raw_db_url):
     if raw_db_url.startswith("postgres://"):
         raw_db_url = raw_db_url.replace("postgres://", "postgresql://", 1)
@@ -74,8 +73,6 @@ def _init_db_once():
             _db_initialised = True
         except Exception as e:
             app.logger.error(f"Primary database init failed: {e}")
-            # If PostgreSQL failed (e.g. invalid credentials or network block),
-            # fall back to SQLite so the site never crashes with a 500 error
             if not str(app.config.get("SQLALCHEMY_DATABASE_URI", "")).startswith("sqlite"):
                 app.logger.warning("Falling back to local SQLite...")
                 app.config["SQLALCHEMY_DATABASE_URI"] = sqlite_uri

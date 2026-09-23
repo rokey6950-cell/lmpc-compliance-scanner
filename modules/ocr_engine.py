@@ -53,7 +53,6 @@ def load_and_preprocess(image_path: str, max_dimension: int = 1800):
         img_scaled = img
 
     gray = cv2.cvtColor(img_scaled, cv2.COLOR_BGR2GRAY)
-    # Using bilateralFilter with radius 5 for fast edge preservation
     gray_filtered = cv2.bilateralFilter(gray, 5, 50, 50)
     thresh = cv2.adaptiveThreshold(
         gray_filtered, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, 15
@@ -71,8 +70,6 @@ def extract_text_and_boxes(image_path: str) -> dict:
     full_text = pytesseract.image_to_string(gray)
     data = pytesseract.image_to_data(gray, output_type=Output.DICT)
 
-    # Smart fallback: if grayscale produces minimal text (< 50 chars),
-    # retry with adaptive thresholding to recover text washed out by glare or low contrast
     if len(full_text.strip()) < 50:
         alt_text = pytesseract.image_to_string(thresh)
         if len(alt_text.strip()) > len(full_text.strip()):
