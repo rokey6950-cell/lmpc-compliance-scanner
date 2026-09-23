@@ -69,8 +69,15 @@ def extract_text_and_boxes(image_path: str) -> dict:
     img, gray, thresh, orig_w, orig_h, scale = load_and_preprocess(image_path)
 
     full_text = pytesseract.image_to_string(gray)
-
     data = pytesseract.image_to_data(gray, output_type=Output.DICT)
+
+    # Smart fallback: if grayscale produces minimal text (< 50 chars),
+    # retry with adaptive thresholding to recover text washed out by glare or low contrast
+    if len(full_text.strip()) < 50:
+        alt_text = pytesseract.image_to_string(thresh)
+        if len(alt_text.strip()) > len(full_text.strip()):
+            full_text = alt_text
+            data = pytesseract.image_to_data(thresh, output_type=Output.DICT)
 
     words = []
     inv_scale = 1.0 / scale
